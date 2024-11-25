@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./transport-app-backend # Caminho para o Dockerfile do backend
+    ports:
+      - "8081:8080" # Mapeia a porta 8080 do host para a 8080 do container
+    env_file:
+      - ./transport-app-backend/.env # Caminho correto do arquivo de ambiente
+    volumes:
+      - ./transport-app-backend:/app # Monta o código local no container
+      - /app/node_modules # Ignora node_modules no volume para evitar conflitos
+    working_dir: /app # Diretório de trabalho no container
+    command: npm run dev # Inicia o servidor de desenvolvimento
+
+  frontend:
+    build:
+      context: ./transport-app-frontend
+    ports:
+      - "80:80"
+    environment:
+      - PORT=80
+    volumes:
+      - ./transport-app-frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm start
