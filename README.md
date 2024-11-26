@@ -1,46 +1,99 @@
-# Getting Started with Create React App
+# Transport App - Instruções de Uso
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este projeto foi desenvolvido com React para o frontend e Node.js com Express para o backend. Abaixo estão as instruções para rodar o projeto localmente e dentro de containers Docker.
 
-## Available Scripts
+## Rodando o projeto com Docker
 
-In the project directory, you can run:
+### 1. Requisitos
+
+- Docker e Docker Compose instalados na sua máquina.
+- Node.js e NPM configurados corretamente no ambiente de desenvolvimento.
+
+### 2. Rodando o Backend e Frontend com Docker
+
+Para rodar o projeto completo (frontend e backend) com Docker, siga os passos abaixo:
+
+1. **Construa e inicie os containers Docker**:
+
+   Execute o comando abaixo para iniciar tanto o backend quanto o frontend:
+
+   ```
+   docker-compose up --build
+   ```
+
+   Este comando irá:
+   - Construir e iniciar os containers conforme o arquivo `docker-compose.yml`.
+   - Iniciar o backend na porta `8080` e o frontend na porta `80`.
+
+2. **Verifique se o backend e o frontend estão rodando**:
+
+   - O **frontend** estará disponível em: [http://localhost:80](http://localhost:80).
+   - O **backend** estará disponível dentro do container na URL `http://transport-app-backend:8080`.
+
+### 3. Verificando os Logs
+
+Se precisar verificar os logs de execução, use os seguintes comandos:
+
+- Logs do frontend:
+  ```
+  docker-compose logs frontend
+  ```
+
+- Logs do backend:
+  ```
+  docker-compose logs backend
+  ```
+
+### 4. Corrigindo problemas de comunicação entre containers
+
+Se o frontend não conseguir se comunicar com o backend, verifique se o nome do serviço está correto no arquivo `docker-compose.yml`. O nome correto deve ser usado no `fetch` dentro do código do frontend. A URL correta para o backend no frontend será `http://transport-app-backend:8080`.
+
+### 5. Rodando apenas o Backend e o Frontend localmente (sem Docker)
+
+#### Backend:
+
+1. Navegue até a pasta do **backend**:
+   ```
+   cd transport-app-backend
+   ```
+
+2. Execute o comando para iniciar o servidor de desenvolvimento:
+   ```
+   npm run dev
+   ```
+
+   Isso iniciará o servidor na porta `8080`.
+
+#### Frontend:
+
+1. Navegue até a pasta do **frontend**:
+   ```
+   cd transport-app-frontend
+   ```
+
+2. Instale as dependências do frontend (caso não tenha feito isso):
+   ```
+   npm install
+   ```
+
+3. Execute o comando para iniciar o frontend:
+   ```
+   npm start
+   ```
+
+   Isso iniciará o servidor na porta `3000`. O frontend será acessível em [http://localhost:3000](http://localhost:3000).
+
+## Scripts Disponíveis
+
+Dentro do diretório do projeto, você pode executar os seguintes comandos:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Executa o aplicativo em modo de desenvolvimento.\
+Abra [http://localhost:80](http://localhost:80) para visualizá-lo no navegador.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Problemas Conhecidos
 
-### `npm test`
+- **Erro de CORS (Cross-Origin Resource Sharing)**: Se o frontend não conseguir acessar o backend, verifique se o CORS está configurado corretamente. Utilize a URL `http://transport-app-backend:8080` para comunicação entre containers Docker.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Problemas de rede entre containers Docker**: Se o frontend não conseguir acessar o backend, certifique-se de que ambos os containers estão rodando na mesma rede do Docker e que o nome do serviço está correto no `docker-compose.yml`.

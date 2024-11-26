@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { calculateRoute } from "../services/googleMapsService";
-import { addRide, getRidesByCustomerId } from "../models/RideModel";
+import { addRide, getRidesByCustomerId } from "../models/rideModel";
 
 export const estimateRide = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log("Requisição recebida:", req.body);
   try {
     const { customer_id, origin, destination } = req.body;
 
@@ -24,7 +25,15 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
     }
 
     // Chamar o Google Maps API para calcular a rota
-    const { distance, duration, route } = await calculateRoute(origin, destination);
+    const { distance, duration, route } = await calculateRoute(origin, destination).catch((err) => {
+      console.error("Erro na API do Google Maps:", err);
+      res.status(500).json({
+        error_code: "MAPS_API_ERROR",
+        error_description: "Erro ao calcular a rota. Tente novamente mais tarde.",
+      });
+      throw err;
+    });
+
 
     // Tabela de motoristas e valores
     const drivers = [
@@ -104,7 +113,7 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
       duration,
       driver,
       value,
-      date: new Date(),
+      date: new Date().toISOString(),
     });
 
     res.status(200).json({ success: true, ride });
@@ -128,12 +137,15 @@ export const getRides = async (req: Request, res: Response, next: NextFunction):
     }
 
     // Buscar viagens do cliente usando o RideModel
-    const rides = getRidesByCustomerId(customer_id, driver_id ? Number(driver_id) : undefined);
+    const rides = getRidesByCustomerId(customer_id, driver_id ? Number(driver_id) : undefined)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    if (rides.length === 0) {
+    if (!rides.length) {
       res.status(404).json({
-        error_code: "NO_RIDES_FOUND",
-        error_description: "Nenhuma viagem encontrada.",
+        error_code: driver_id ? "NO_RIDES_WITH_DRIVER" : "NO_RIDES_FOUND",
+        error_description: driver_id
+          ? "Nenhuma viagem encontrada para o motorista especificado."
+          : "Nenhuma viagem encontrada para este cliente.",
       });
       return;
     }

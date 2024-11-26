@@ -1,10 +1,11 @@
-import express from "express";
+import { Router } from "express";
 import { estimateRide, confirmRide, getRides } from "../controllers/rideController";
 
-const router = express.Router();
+const router = Router();
 
+// Definir as rotas para o recurso "ride"
 router.post("/estimate", estimateRide);
-router.patch("/confirm", confirmRide);
+router.post("/confirm", confirmRide);
 router.get("/:customer_id", getRides);
 
 export default router;
