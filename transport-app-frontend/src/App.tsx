@@ -5,7 +5,7 @@ const App: React.FC = () => {
   console.log("App está sendo renderizado");
   return (
     <div>
-      <h1>Bem-vindo ao Ride App</h1>
+      <h1></h1>
       <RideForm />
     </div>
   );

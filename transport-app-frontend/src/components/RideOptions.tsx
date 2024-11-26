@@ -7,7 +7,7 @@ const RideOptions: React.FC = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/ride/options"); // Atualize com a lógica correta
+        const response = await axios.get("http://localhost:8080/ride/options");
         setOptions(response.data.options);
       } catch (error) {
         console.error("Erro ao buscar opções", error);

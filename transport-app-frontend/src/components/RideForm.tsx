@@ -1,75 +1,91 @@
 import React, { useState } from "react";
-import api from "../services/apiService";
+import "./RideForm.css"; // Certifique-se de importar o arquivo CSS com a fonte
 
 const RideForm: React.FC = () => {
-  const [formData, setFormData] = useState({
-    customer_id: "",
-    origin: "",
-    destination: "",
-  });
-  const [message, setMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Estado para carregamento
+  const [customerId, setCustomerId] = useState<string>("");
+  const [origin, setOrigin] = useState<string>("");
+  const [destination, setDestination] = useState<string>("");
+  const [result, setResult] = useState<any>(null); // Para exibir os resultados
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const estimateRide = async () => {
+    const response = await fetch("http://transport-app-backend:8080/ride/estimate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customer_id: "1",
+        origin: "Av. Paulista, São Paulo",
+        destination: "Praça da Sé, São Paulo",
+      }),
+    });
 
-  const fetchRideEstimate = async (data: { customer_id: string; origin: string; destination: string }) => {
-    try {
-      const response = await api.post("/ride/estimate", data);
-      console.log("Estimativa de viagem:", response.data);
-      localStorage.setItem("rideEstimate", JSON.stringify(response.data));
-      window.location.href = "/options"; // Redireciona após sucesso
-    } catch (error: any) {
-      console.error("Erro ao buscar estimativa de viagem:", error);
-      setMessage(error.response?.data?.error_description || "Erro ao conectar com o servidor.");
-    }
-  };
-
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validações de formulário
-    if (!formData.customer_id.trim() || !formData.origin.trim() || !formData.destination.trim()) {
-      setMessage("Todos os campos são obrigatórios.");
+    if (!response.ok) {
+      const errorData = await response.json();
+      setError(errorData.error_description || "Erro desconhecido no servidor.");
+      setResult(null);
       return;
     }
 
-    setMessage(null); // Limpar mensagens de erro antes da nova tentativa
-    fetchRideEstimate(formData);
+    const data = await response.json();
+    setResult(data);
+    setError(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Evitar o reload da página
+    estimateRide();
   };
 
   return (
-    <div>
-      <h1>Solicitação de Viagem</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          name="customer_id"
-          placeholder="ID do Usuário"
-          value={formData.customer_id} // Mantém o valor no campo
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="origin"
-          placeholder="Origem"
-          value={formData.origin} // Mantém o valor no campo
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="destination"
-          placeholder="Destino"
-          value={formData.destination} // Mantém o valor no campo
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Calculando..." : "Calcular Estimativa"}
-        </button>
+    <div className="container">
+      <h2 className="heading">Estimar Viagem</h2>
+      <form onSubmit={handleSubmit} className="form">
+        <div className="inputGroup">
+          <label htmlFor="customerId" className="label">ID do Cliente:</label>
+          <input
+            type="text"
+            id="customerId"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            required
+            className="input"
+          />
+        </div>
+        <div className="inputGroup">
+          <label htmlFor="origin" className="label">Origem:</label>
+          <input
+            type="text"
+            id="origin"
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value)}
+            required
+            className="input"
+          />
+        </div>
+        <div className="inputGroup">
+          <label htmlFor="destination" className="label">Destino:</label>
+          <input
+            type="text"
+            id="destination"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            required
+            className="input"
+          />
+        </div>
+        <button type="submit" className="button">CALCULAR</button>
       </form>
-      {message && <p>{message}</p>} {/* Exibe mensagens de erro ou sucesso */}
+
+      {error && <p className="error">Erro: {error}</p>}
+
+      {result && (
+        <div className="result">
+          <h3>Resultado:</h3>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 };
