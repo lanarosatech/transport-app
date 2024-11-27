@@ -15,6 +15,13 @@ body, html {
   justify-content: center; /* Centraliza horizontalmente */
   align-items: center; /* Centraliza verticalmente */
   background-color: #f4f4f4; /* Cor de fundo da página */
+  background-image: url('./bg-nyc.png');  /* Caminho relativo à pasta 'public' */
+  background-size: cover;  /* Faz a imagem cobrir todo o fundo */
+  background-repeat: no-repeat;  /* Evita repetição da imagem */
+  background-position: center;  /* Centraliza a imagem */
+  font-family: Arial, sans-serif;  /* Fonte padrão */
+  margin: 0;
+  padding: 0;
 }
 
 .container {
@@ -87,13 +94,50 @@ body, html {
 }
 
 .result {
-  margin-top: 20px;
+  max-height: 250px;  /* Limite de altura da div */
+  overflow-y: auto;   /* Adiciona a barra de rolagem vertical */
   padding: 10px;
-  background-color: #ffeaf2; /* Cor de fundo suave para resultado */
-  border-radius: 4px;
-  border: 1px solid #ffeaf2;
+  border: 1px solid #ddd;  /* Borda para melhor visualização */
+  background-color: #ffeaf2;  /* Cor de fundo para contraste */
+  margin-top: 20px;
 }
 
+/* Lista de motoristas */
+.drivers-list {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.vehicle {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Estilo para o card de cada viagem */
+.result ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.result li p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #555;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 5px;
+}
+
+.result li p strong {
+  font-weight: bold;
+}
 
 /* Navbar - no topo da página */
 .navbar {

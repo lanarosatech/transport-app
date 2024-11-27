@@ -10,7 +10,7 @@ const App: React.FC = () => {
     <div>
       <div className="navbar">
         <button onClick={() => setCurrentPage('home')}>Home</button>
-        <button onClick={() => setCurrentPage('history')}>Histórico de Viagens</button>
+        <button onClick={() => setCurrentPage('history')}>Viagens</button>
         <button onClick={() => setCurrentPage('drivers')}>Motoristas</button>
       </div>
 

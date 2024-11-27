@@ -10,8 +10,9 @@ const RideOptions: React.FC = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/ride/options");
-        setOptions(response.data.options);
+        // URL corrigida para o backend
+        const response = await axios.get("http://localhost:8080/ride/drivers");
+        setOptions(response.data.drivers); // Usando a chave correta 'drivers'
       } catch (error) {
         console.error("Erro ao buscar opções", error);
         setError("Erro ao carregar opções de motoristas.");
@@ -25,7 +26,7 @@ const RideOptions: React.FC = () => {
 
   return (
     <div className="container">
-      <h2 className="heading">Motoristas</h2>
+      <h2 className="heading">Motoristas Parceiros</h2>
 
       {/* Exibindo mensagem de carregamento */}
       {loading && <p>Carregando motoristas...</p>}
@@ -36,15 +37,16 @@ const RideOptions: React.FC = () => {
       {/* Exibindo as opções se estiverem disponíveis */}
       {!loading && !error && options.length === 0 && <p>Sem motoristas disponíveis no momento.</p>}
 
+      {/* Exibindo os motoristas */}
       <div className="result">
         {!loading && !error && options.length > 0 && (
-          <div>
+          <div className="drivers-list">
             {options.map((option: any) => (
-              <div key={option.id} className="option-card">
-                <p><strong>Nome:</strong> {option.name}</p>
-                <p><strong>Carro:</strong> {option.vehicle}</p>
-                <p><strong>Avaliação:</strong> {option.review.rating}</p>
-                <p><strong>Valor:</strong> R$ {option.value.toFixed(2)}</p>
+              <div key={option.driver_id} className="option-card">
+                <div className="card-header">
+                  <h3>{option.name}</h3>
+                  <p className="vehicle">{option.vehicle}</p>
+                </div>
               </div>
             ))}
           </div>

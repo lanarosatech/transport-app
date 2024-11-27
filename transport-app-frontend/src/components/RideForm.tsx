@@ -1,41 +1,67 @@
 import React, { useState } from "react";
 import "./Components.css";
 
+// Tipagem para os dados de erro e resultado
+interface ErrorResponse {
+  error_code: string;
+  error_description: string;
+}
+
+interface RideResult {
+  origin: string;
+  destination: string;
+  distance: number;
+  duration: string;
+  options: any[];
+}
+
 const RideForm: React.FC = () => {
+  // Estados
   const [customerId, setCustomerId] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
-  const [result, setResult] = useState<any>(null); // Para exibir os resultados
+  const [result, setResult] = useState<RideResult | null>(null); // Tipagem para o resultado
   const [error, setError] = useState<string | null>(null);
 
+  // Função para estimar a viagem
   const estimateRide = async () => {
-    const response = await fetch("http://transport-app-backend:8080/ride/estimate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        customer_id: "1",
-        origin: "Av. Paulista, São Paulo",
-        destination: "Praça da Sé, São Paulo",
-      }),
-    });
+    try {
+      const response = await fetch("http://localhost:8080/ride/estimate", {  // Verifique a URL
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customer_id: customerId, // Usar o ID de cliente do estado
+          origin,
+          destination,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      setError(errorData.error_description || "Erro desconhecido no servidor.");
-      setResult(null);
-      return;
+      if (!response.ok) {
+        const errorData: ErrorResponse = await response.json();
+        setError(errorData.error_description || "Erro desconhecido no servidor.");
+        setResult(null);
+        return;
+      }
+
+      const data: RideResult = await response.json();
+      setResult(data);
+      setError(null);
+    } catch (err) {
+      console.error("Erro na requisição:", err);
+      setError("Erro na comunicação com o servidor.");
     }
-
-    const data = await response.json();
-    setResult(data);
-    setError(null);
   };
 
+  // Manipulador de envio do formulário
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Evitar o reload da página
-    estimateRide();
+    e.preventDefault();
+    if (customerId && origin && destination) {
+      estimateRide();
+    } else {
+      setError("Preencha todos os campos.");
+    }
   };
 
   return (
@@ -75,7 +101,7 @@ const RideForm: React.FC = () => {
             className="input"
           />
         </div>
-        <button type="submit" className="button">calcular</button>
+        <button type="submit" className="button">Calcular</button>
       </form>
 
       {error && <p className="error">Erro: {error}</p>}

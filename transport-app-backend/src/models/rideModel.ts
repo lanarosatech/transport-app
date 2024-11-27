@@ -9,14 +9,7 @@ const client = new Client({
   port: 5432,
 });
 
-// Conectar ao banco de dados
 client.connect();
-
-// Definindo o tipo Driver
-interface Driver {
-  id: string;
-  name: string;
-}
 
 // Definindo o tipo Ride
 interface Ride {
@@ -26,7 +19,7 @@ interface Ride {
   destination: string;
   distance: number;
   duration: string;
-  driver_id: number; // O campo driver_id agora é do tipo string, pois é uma chave estrangeira
+  driver_id: string; // driver_id é string para corresponder ao banco de dados
   value: number;
   date: string;
 }
@@ -34,7 +27,6 @@ interface Ride {
 // Função para adicionar uma corrida
 export const addRide = async (ride: Ride) => {
   const { customer_id, origin, destination, distance, duration, driver_id, value } = ride;
-
   try {
     const res = await client.query(
       'INSERT INTO ride_history (customer_id, origin, destination, distance, duration, driver_id, value) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
@@ -47,21 +39,6 @@ export const addRide = async (ride: Ride) => {
   }
 };
 
-// Função para buscar corridas de um cliente
-export const getRidesByCustomerId = async (customer_id: string, driver_id?: string) => {
-  try {
-    const query = driver_id
-      ? 'SELECT * FROM ride_history WHERE customer_id = $1 AND driver_id = $2'
-      : 'SELECT * FROM ride_history WHERE customer_id = $1';
-
-    const res = await client.query(query, driver_id ? [customer_id, driver_id] : [customer_id]);
-    return res.rows; // Retorna todas as corridas encontradas
-  } catch (err) {
-    console.error("Erro ao buscar corridas:", err);
-    throw err;
-  }
-};
-
 // Função para listar todos os motoristas
 export const getAllDrivers = async () => {
   try {
@@ -70,5 +47,33 @@ export const getAllDrivers = async () => {
   } catch (err) {
     console.error("Erro ao buscar motoristas:", err);
     throw err;
+  }
+};
+
+// Função para buscar corridas pelo customer_id
+export const getRidesByCustomerId = async (customer_id: string) => {
+  try {
+    const res = await client.query(
+      'SELECT * FROM ride_history WHERE customer_id = $1',
+      [customer_id]
+    );
+    return res.rows;
+  } catch (error) {
+    console.error("Erro ao buscar corridas do cliente:", error);
+    throw error;
+  }
+};
+
+// Função para buscar corridas pelo driver_id
+export const getRidesByDriverId = async (driver_id: string) => {
+  try {
+    const res = await client.query(
+      'SELECT * FROM ride_history WHERE driver_id = $1',
+      [driver_id]
+    );
+    return res.rows;
+  } catch (error) {
+    console.error("Erro ao buscar corridas do motorista:", error);
+    throw error;
   }
 };

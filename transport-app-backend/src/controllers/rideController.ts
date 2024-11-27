@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { calculateRoute } from '../services/googleMapsService';
-import { addRide, getRidesByCustomerId, getAllDrivers } from '../models/rideModel';
+import { addRide, getAllDrivers, getRidesByCustomerId, getRidesByDriverId } from '../models/rideModel';
 
 // Definir a interface Driver
 interface Driver {
-  id: number;
+  id: string; // Ajustado para string
   name: string;
   vehicle: string;
   price_per_km: number;
@@ -38,7 +38,7 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
     }
 
     // Chamar a API do Google Maps para calcular a rota
-    const { distance, duration } = await calculateRoute(origin, destination).catch((err) => {
+    const { distance, duration, route } = await calculateRoute(origin, destination).catch((err: any) => {
       console.error("Erro na API do Google Maps:", err);
       res.status(500).json({
         error_code: "MAPS_API_ERROR",
@@ -47,21 +47,12 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
       throw err;
     });
 
-    // Buscar motoristas disponíveis
-    const drivers: Driver[] = await getAllDrivers();  // Agora está explicitamente tipado como um array de Driver
-
-    // Calcular o valor total para cada motorista
-    const options = drivers.map((driver) => ({
-      ...driver,
-      value: (distance * driver.price_per_km).toFixed(2), // Valor total em reais
-    }));
-
     res.status(200).json({
       origin,
       destination,
       distance,
       duration,
-      options,
+      route,
     });
   } catch (error) {
     next(error); // Delegar erros para o middleware de erro
@@ -100,7 +91,7 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
       destination,
       distance,
       duration,
-      driver_id: driverData.id,  // Agora você está passando apenas o ID do driver
+      driver_id: driverData.id,  // driver_id é string
       value,
       date: new Date().toISOString(),
     });
@@ -111,46 +102,51 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-// Buscar corridas por cliente
-export const getRides = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// Buscar todos os motoristas
+export const getDrivers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { customer_id } = req.params;
-    const { driver_id } = req.query;
-
-    // Validação
-    if (!customer_id) {
-      res.status(400).json({
-        error_code: "INVALID_DATA",
-        error_description: "O ID do cliente é obrigatório.",
-      });
-      return;
-    }
-
-    // Buscar corridas do cliente
-    const rides = await getRidesByCustomerId(customer_id, driver_id ? String(driver_id) : undefined);
-
-    if (!rides.length) {
-      res.status(404).json({
-        error_code: driver_id ? "NO_RIDES_WITH_DRIVER" : "NO_RIDES_FOUND",
-        error_description: driver_id
-          ? "Nenhuma viagem encontrada para o motorista especificado."
-          : "Nenhuma viagem encontrada para este cliente.",
-      });
-      return;
-    }
-
-    res.status(200).json({ customer_id, rides });
+    const drivers = await getAllDrivers(); // Busca os motoristas no banco de dados
+    res.json({ drivers });
   } catch (error) {
-    next(error); // Delegar erros para o middleware de erro
+    console.error("Erro ao buscar motoristas:", error);
+    res.status(500).json({
+      error_code: "SERVER_ERROR",
+      error_description: "Erro ao buscar motoristas.",
+    });
   }
 };
 
-// Buscar todos os motoristas
-export const getDrivers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// Buscar histórico de viagens
+export const getRideHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const drivers = await getAllDrivers(); // Busca todos os motoristas do banco
-    res.status(200).json({ drivers });
+    const { customer_id, driver_id } = req.query;
+
+    let rides;
+
+    // Verifica se o cliente ou motorista foi fornecido
+    if (customer_id) {
+      rides = await getRidesByCustomerId(customer_id as string); // Busca corridas pelo ID do cliente
+    } else if (driver_id) {
+      rides = await getRidesByDriverId(driver_id as string); // Busca corridas pelo código do motorista
+    } else {
+      res.status(400).json({
+        error_code: "INVALID_REQUEST",
+        error_description: "É necessário fornecer o ID do cliente ou o código do motorista.",
+      });
+      return;
+    }
+
+    if (!rides || rides.length === 0) {
+      res.status(404).json({
+        error_code: "NO_RIDES_FOUND",
+        error_description: "Nenhuma viagem encontrada.",
+      });
+      return;
+    }
+
+    res.status(200).json({ rides }); // Retorna as corridas encontradas
   } catch (error) {
+    console.error("Erro ao buscar histórico de viagens:", error);
     next(error); // Delegar erros para o middleware de erro
   }
 };

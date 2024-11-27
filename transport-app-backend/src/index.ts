@@ -8,7 +8,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// Configuração do CORS permitindo o front-end rodando na porta 3000
+app.use(cors({
+  origin: "http://localhost:3000",  // Permitir apenas o front-end rodando na porta 3000
+}));
 
 // Configurar para interpretar JSON antes das rotas
 app.use(express.json());
