@@ -19,20 +19,21 @@ body, html {
 
 .container {
   max-width: 400px;
-  width: 100%; /* Garantir que o container ocupe toda a largura possível até o limite */
+  width: 100%;
   margin: 0 auto;
-  padding: 30px; /* Aumentei o padding para dar mais espaço dentro do container */
+  padding: 15px;
   background-color: #382f32;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center; /* Centraliza todo o conteúdo dentro do container */
+  text-align:left; /* Centraliza todo o conteúdo dentro do container */
+  margin-top: 15px;
 }
 
 .heading {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #ffffff;
-  font-size: 24px; /* Aumentei o tamanho da fonte para o título */
+  font-size: 25px; /* Aumentei o tamanho da fonte para o título */
 }
 
 .form {
@@ -41,14 +42,14 @@ body, html {
 }
 
 .inputGroup {
-  margin-bottom: 20px; /* Aumentei o espaçamento entre os campos de entrada */
+  margin-bottom: 25px;
 }
 
 .label {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 5px;
-  color: #ffffff; /* Cor de texto para as labels */
+  margin-bottom: 8px;
+  color: #ffffff;
 }
 
 .input {
@@ -68,9 +69,10 @@ body, html {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: bold; /* Tornando o texto do botão em negrito */
+  font-weight: bold;
   transition: background-color 0.3s;
-  margin-top: 10px; /* Adicionando espaçamento entre o botão e o campo anterior */
+  margin-top: 10px;
+  width: 100%;
 }
 
 .button:hover {
@@ -78,7 +80,7 @@ body, html {
 }
 
 .error {
-  color: rgb(51, 1, 15);
+  color: #ffeaf2;
   font-size: 14px;
   margin-top: 10px;
   font-weight: bold; /* Tornando a mensagem de erro em negrito */
@@ -87,11 +89,50 @@ body, html {
 .result {
   margin-top: 20px;
   padding: 10px;
-  background-color: #e8f7e8; /* Cor de fundo suave para resultado */
+  background-color: #ffeaf2; /* Cor de fundo suave para resultado */
   border-radius: 4px;
-  border: 1px solid #d0f0c0;
+  border: 1px solid #ffeaf2;
 }
 
-button:focus, input:focus {
-  outline: none; /* Remove o outline padrão ao focar no botão ou input */
+
+/* Navbar - no topo da página */
+.navbar {
+  display: flex;
+  justify-content: center; /* Centraliza os itens horizontalmente */
+  align-items: center; /* Alinha os itens verticalmente */
+  background-color: #382f32; /* Cor de fundo da navbar */
+  padding: 15px 0; /* Espaçamento interno */
+  position: fixed; /* Fixa a navbar no topo */
+  top: 0; /* Fixa no topo da página */
+  left: 0;
+  right: 0;
+  z-index: 100; /* Garante que a navbar fique por cima do conteúdo */
+}
+
+.navbar button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #f4f4f4;
+  background-color: #382f32; /* Cor de fundo dos botões */
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px; /* Espaçamento entre os botões */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.navbar button:hover {
+  background-color: #f1396d; /* Cor quando o mouse passa por cima */
+}
+
+footer {
+  padding: 10px;
+  background-color: #f4f4f4;
+  color: #382f32;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10; /* Garante que o footer apareça abaixo de outros elementos */
 }

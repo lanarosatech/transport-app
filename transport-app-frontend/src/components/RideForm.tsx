@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./RideForm.css"; // Certifique-se de importar o arquivo CSS com a fonte
+import "./Components.css";
 
 const RideForm: React.FC = () => {
   const [customerId, setCustomerId] = useState<string>("");
@@ -40,7 +40,7 @@ const RideForm: React.FC = () => {
 
   return (
     <div className="container">
-      <h2 className="heading">Estimar Viagem</h2>
+      <h2 className="heading">Calcular Viagem</h2>
       <form onSubmit={handleSubmit} className="form">
         <div className="inputGroup">
           <label htmlFor="customerId" className="label">ID do Cliente:</label>
@@ -75,7 +75,7 @@ const RideForm: React.FC = () => {
             className="input"
           />
         </div>
-        <button type="submit" className="button">CALCULAR</button>
+        <button type="submit" className="button">calcular</button>
       </form>
 
       {error && <p className="error">Erro: {error}</p>}
