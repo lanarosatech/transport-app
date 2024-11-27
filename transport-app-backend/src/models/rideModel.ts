@@ -12,6 +12,13 @@ const client = new Client({
 // Conectar ao banco de dados
 client.connect();
 
+// Definindo o tipo Driver
+interface Driver {
+  id: string;
+  name: string;
+}
+
+// Definindo o tipo Ride
 interface Ride {
   id: number;
   customer_id: string;
@@ -19,7 +26,7 @@ interface Ride {
   destination: string;
   distance: number;
   duration: string;
-  driver_id: string; // Apenas o driver_id, pois a relação é feita pela chave estrangeira
+  driver_id: number; // O campo driver_id agora é do tipo string, pois é uma chave estrangeira
   value: number;
   date: string;
 }

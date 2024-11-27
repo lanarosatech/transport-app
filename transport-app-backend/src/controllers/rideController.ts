@@ -100,7 +100,7 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
       destination,
       distance,
       duration,
-      driver: driverData, // Agora você está passando o driver corretamente
+      driver_id: driverData.id,  // Agora você está passando apenas o ID do driver
       value,
       date: new Date().toISOString(),
     });
@@ -127,7 +127,7 @@ export const getRides = async (req: Request, res: Response, next: NextFunction):
     }
 
     // Buscar corridas do cliente
-    const rides = await getRidesByCustomerId(customer_id, driver_id ? Number(driver_id) : undefined);
+    const rides = await getRidesByCustomerId(customer_id, driver_id ? String(driver_id) : undefined);
 
     if (!rides.length) {
       res.status(404).json({
