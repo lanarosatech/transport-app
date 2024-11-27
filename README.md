@@ -27,7 +27,7 @@ Para rodar o projeto completo (frontend e backend) com Docker, siga os passos ab
 
 2. **Verifique se o backend e o frontend estão rodando**:
 
-   - O **frontend** estará disponível em: [http://localhost:80](http://localhost:80).
+   - O **frontend** estará disponível em: [http://localhost](http://localhost).
    - O **backend** estará disponível dentro do container na URL `http://transport-app-backend:8080`.
 
 ### 3. Verificando os Logs
@@ -48,9 +48,9 @@ Se precisar verificar os logs de execução, use os seguintes comandos:
 
 Se o frontend não conseguir se comunicar com o backend, verifique se o nome do serviço está correto no arquivo `docker-compose.yml`. O nome correto deve ser usado no `fetch` dentro do código do frontend. A URL correta para o backend no frontend será `http://transport-app-backend:8080`.
 
-### 5. Rodando apenas o Backend e o Frontend localmente (sem Docker)
+## Rodando o Backend e o Frontend localmente (sem Docker)
 
-#### Backend:
+### Backend:
 
 1. Navegue até a pasta do **backend**:
    ```
@@ -64,7 +64,7 @@ Se o frontend não conseguir se comunicar com o backend, verifique se o nome do 
 
    Isso iniciará o servidor na porta `8080`.
 
-#### Frontend:
+### Frontend:
 
 1. Navegue até a pasta do **frontend**:
    ```
@@ -90,10 +90,16 @@ Dentro do diretório do projeto, você pode executar os seguintes comandos:
 ### `npm start`
 
 Executa o aplicativo em modo de desenvolvimento.\
-Abra [http://localhost:80](http://localhost:80) para visualizá-lo no navegador.
+Abra [http://localhost](http://localhost) para visualizá-lo no navegador.
 
 ## Problemas Conhecidos
 
 - **Erro de CORS (Cross-Origin Resource Sharing)**: Se o frontend não conseguir acessar o backend, verifique se o CORS está configurado corretamente. Utilize a URL `http://transport-app-backend:8080` para comunicação entre containers Docker.
 
 - **Problemas de rede entre containers Docker**: Se o frontend não conseguir acessar o backend, certifique-se de que ambos os containers estão rodando na mesma rede do Docker e que o nome do serviço está correto no `docker-compose.yml`.
+
+## Atualizações Recentes
+
+- **Background do Aplicativo**: Adicionada uma imagem de fundo ao body do aplicativo para melhorar o design visual.
+- **Front-end nas Rotas**: Implementada navegação entre Home, Histórico de Viagens e Motoristas no front-end, com ajustes de estilo para melhorar a experiência do usuário.
+- **Backend - Histórico de Corridas**: Adicionado endpoint para buscar o histórico de corridas, permitindo pesquisa tanto pelo ID do cliente quanto pelo código do motorista.
