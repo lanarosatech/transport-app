@@ -1,6 +1,19 @@
-import { Request, Response, NextFunction } from "express";
-import { calculateRoute } from "../services/googleMapsService";
-import { addRide, getRidesByCustomerId } from "../models/rideModel";
+import { Request, Response, NextFunction } from 'express';
+import { calculateRoute } from '../services/googleMapsService';
+import { addRide, getRidesByCustomerId, getAllDrivers } from '../models/rideModel';
+
+// Definir a interface Driver
+interface Driver {
+  id: number;
+  name: string;
+  vehicle: string;
+  price_per_km: number;
+  description: string;
+  review: {
+    rating: number;
+    comment: string;
+  };
+}
 
 export const estimateRide = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log("Requisição recebida:", req.body);
@@ -24,8 +37,8 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    // Chamar o Google Maps API para calcular a rota
-    const { distance, duration, route } = await calculateRoute(origin, destination).catch((err) => {
+    // Chamar a API do Google Maps para calcular a rota
+    const { distance, duration } = await calculateRoute(origin, destination).catch((err) => {
       console.error("Erro na API do Google Maps:", err);
       res.status(500).json({
         error_code: "MAPS_API_ERROR",
@@ -34,34 +47,8 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
       throw err;
     });
 
-
-    // Tabela de motoristas e valores
-    const drivers = [
-      {
-        id: 1,
-        name: "Homer Simpson",
-        description: "Relaxe e aproveite o passeio.",
-        vehicle: "Plymouth Valiant 1973",
-        review: { rating: 2, comment: "Carro cheira a donuts." },
-        price_per_km: 2.5,
-      },
-      {
-        id: 2,
-        name: "Dominic Toretto",
-        description: "Viagem rápida e segura.",
-        vehicle: "Dodge Charger R/T 1970",
-        review: { rating: 4, comment: "Carro é um show à parte." },
-        price_per_km: 5.0,
-      },
-      {
-        id: 3,
-        name: "James Bond",
-        description: "Viagem suave e discreta.",
-        vehicle: "Aston Martin DB5",
-        review: { rating: 5, comment: "Experiência digna de um agente secreto." },
-        price_per_km: 10.0,
-      },
-    ];
+    // Buscar motoristas disponíveis
+    const drivers: Driver[] = await getAllDrivers();  // Agora está explicitamente tipado como um array de Driver
 
     // Calcular o valor total para cada motorista
     const options = drivers.map((driver) => ({
@@ -70,12 +57,11 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
     }));
 
     res.status(200).json({
-      origin: { latitude: route.legs[0].start_location.lat, longitude: route.legs[0].start_location.lng },
-      destination: { latitude: route.legs[0].end_location.lat, longitude: route.legs[0].end_location.lng },
+      origin,
+      destination,
       distance,
       duration,
       options,
-      routeResponse: route,
     });
   } catch (error) {
     next(error); // Delegar erros para o middleware de erro
@@ -85,6 +71,9 @@ export const estimateRide = async (req: Request, res: Response, next: NextFuncti
 export const confirmRide = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { customer_id, origin, destination, distance, duration, driver, value } = req.body;
+
+    // Validar o tipo de driver
+    const driverData: Driver = driver;  // Agora o TypeScript sabe que o driver é do tipo Driver
 
     // Validações
     if (!customer_id || !origin || !destination || !driver || !value || !distance || !duration) {
@@ -103,15 +92,15 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Salvar viagem usando o RideModel
-    const ride = addRide({
+    // Salvar a corrida no banco de dados
+    const ride = await addRide({
       id: Date.now(),
       customer_id,
       origin,
       destination,
       distance,
       duration,
-      driver,
+      driver: driverData, // Agora você está passando o driver corretamente
       value,
       date: new Date().toISOString(),
     });
@@ -122,6 +111,7 @@ export const confirmRide = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+// Buscar corridas por cliente
 export const getRides = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { customer_id } = req.params;
@@ -136,9 +126,8 @@ export const getRides = async (req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    // Buscar viagens do cliente usando o RideModel
-    const rides = getRidesByCustomerId(customer_id, driver_id ? Number(driver_id) : undefined)
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Buscar corridas do cliente
+    const rides = await getRidesByCustomerId(customer_id, driver_id ? Number(driver_id) : undefined);
 
     if (!rides.length) {
       res.status(404).json({
@@ -151,6 +140,16 @@ export const getRides = async (req: Request, res: Response, next: NextFunction):
     }
 
     res.status(200).json({ customer_id, rides });
+  } catch (error) {
+    next(error); // Delegar erros para o middleware de erro
+  }
+};
+
+// Buscar todos os motoristas
+export const getDrivers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const drivers = await getAllDrivers(); // Busca todos os motoristas do banco
+    res.status(200).json({ drivers });
   } catch (error) {
     next(error); // Delegar erros para o middleware de erro
   }

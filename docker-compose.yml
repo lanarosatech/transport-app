@@ -20,9 +20,9 @@ services:
     build:
       context: ./transport-app-frontend
     ports:
-      - "80:80"  # Porta 80 do host mapeada para a porta 80 do container
+      - "3000:3000"
     environment:
-      - PORT=80
+      - PORT=3000
     volumes:
       - ./transport-app-frontend:/app
       - /app/node_modules

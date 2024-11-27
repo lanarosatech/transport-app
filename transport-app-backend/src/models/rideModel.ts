@@ -1,3 +1,17 @@
+import { Client } from 'pg';
+
+// Conectar ao banco de dados
+const client = new Client({
+  host: 'localhost',
+  database: 'transport_app',
+  user: 'postgres',
+  password: 'sua-senha', // Substitua pela sua senha do PostgreSQL
+  port: 5432,
+});
+
+// Conectar ao banco de dados
+client.connect();
+
 interface Ride {
   id: number;
   customer_id: string;
@@ -5,59 +19,49 @@ interface Ride {
   destination: string;
   distance: number;
   duration: string;
-  driver: {
-    id: number;
-    name: string;
-  };
+  driver_id: string; // Apenas o driver_id, pois a relação é feita pela chave estrangeira
   value: number;
-  date: string; // ISO String para facilitar ordenação e manipulação
+  date: string;
 }
 
-let rides: Array<any> = [
-  {
-    id: 1,
-    customer_id: "1",
-    origin: "Av. Paulista, São Paulo",
-    destination: "Praça da Sé, São Paulo",
-    distance: 4.6,
-    duration: "16 mins",
-    driver: {
-      id: 1,
-      name: "Homer Simpson",
-    },
-    value: 11.5,
-    date: "2024-11-26T10:00:00Z",
-  },
-  {
-    id: 2,
-    customer_id: "1",
-    origin: "Praça da Sé, São Paulo",
-    destination: "Av. Faria Lima, São Paulo",
-    distance: 8.2,
-    duration: "25 mins",
-    driver: {
-      id: 2,
-      name: "Dominic Toretto",
-    },
-    value: 41.0,
-    date: "2024-11-26T11:00:00Z",
-  },
-]
+// Função para adicionar uma corrida
+export const addRide = async (ride: Ride) => {
+  const { customer_id, origin, destination, distance, duration, driver_id, value } = ride;
 
-// Funções para manipular os dados
-export const getRidesByCustomerId = (customer_id: string, driver_id?: number) => {
-  if (driver_id) {
-    return rides.filter((ride) => ride.customer_id === customer_id && ride.driver.id === driver_id);
+  try {
+    const res = await client.query(
+      'INSERT INTO ride_history (customer_id, origin, destination, distance, duration, driver_id, value) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [customer_id, origin, destination, distance, duration, driver_id, value]
+    );
+    return res.rows[0]; // Retorna o registro da corrida inserida
+  } catch (err) {
+    console.error("Erro ao adicionar a corrida:", err);
+    throw err;
   }
-  return rides.filter((ride) => ride.customer_id === customer_id);
 };
 
-export const addRide = (ride: any) => {
-  rides.push(ride);
-  return ride;
+// Função para buscar corridas de um cliente
+export const getRidesByCustomerId = async (customer_id: string, driver_id?: string) => {
+  try {
+    const query = driver_id
+      ? 'SELECT * FROM ride_history WHERE customer_id = $1 AND driver_id = $2'
+      : 'SELECT * FROM ride_history WHERE customer_id = $1';
+
+    const res = await client.query(query, driver_id ? [customer_id, driver_id] : [customer_id]);
+    return res.rows; // Retorna todas as corridas encontradas
+  } catch (err) {
+    console.error("Erro ao buscar corridas:", err);
+    throw err;
+  }
 };
 
-// Função para listar todas as viagens (opcional, para debug)
-export const getAllRides = (): Ride[] => {
-  return [...rides]; // Retorna uma cópia para evitar alterações diretas
+// Função para listar todos os motoristas
+export const getAllDrivers = async () => {
+  try {
+    const res = await client.query('SELECT * FROM drivers');
+    return res.rows; // Retorna todos os motoristas
+  } catch (err) {
+    console.error("Erro ao buscar motoristas:", err);
+    throw err;
+  }
 };
